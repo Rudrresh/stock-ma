@@ -1,0 +1,24 @@
+# Ignore everything by default
+*
+
+# Un-ignore only the deployment files you requested
+!.gitignore
+!server.py
+!requirements.txt
+!Procfile
+# README.md is intentionally ignored for deployment-only repo
+README.md
+
+# OS / Editor / Python artifacts (kept for clarity but already covered by '*')
+# These explicit ignores are harmless if someone later flips the global rule.
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyo
+.mypy_cache/
+.pytest_cache/
+.vscode/
+.idea/
+.DS_Store
