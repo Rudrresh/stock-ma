@@ -1,15 +1,36 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 import yfinance as yf
 import pandas as pd
 from datetime import date, timedelta
 from typing import List
 import logging
+import asyncio
+import aiohttp
+import os
 
 # Basic startup logging to help debugging on hosts like Render
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("stock-ma")
 
 app = FastAPI(title="Dip Buying Trigger API")
+
+# Background task to keep the server alive
+async def keep_alive():
+    """Ping self every 14 minutes to prevent Render from sleeping."""
+    ping_url = f"http://0.0.0.0:{os.getenv('PORT', '8000')}/ping"
+    async with aiohttp.ClientSession() as session:
+        while True:
+            try:
+                async with session.head(ping_url) as response:
+                    logger.info(f"Self-ping status: {response.status}")
+            except Exception as e:
+                logger.error(f"Self-ping failed: {e}")
+            await asyncio.sleep(840)  # 14 minutes
+
+@app.on_event("startup")
+async def start_keep_alive():
+    """Start the keep-alive background task when the app starts."""
+    asyncio.create_task(keep_alive())
 
 
 @app.on_event("startup")
@@ -83,6 +104,11 @@ def _get_last_close_and_dma(data: pd.DataFrame):
 @app.get("/", tags=["health"])
 def read_root():
     return {"status": "ok", "message": "Dip Buying Trigger API"}
+
+@app.head("/ping")
+async def ping():
+    """Lightweight ping endpoint for keep-alive."""
+    return {"status": "ok"}
 
 
 @app.get("/routes", tags=["debug"])
