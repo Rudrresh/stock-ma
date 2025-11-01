@@ -3,8 +3,20 @@ import yfinance as yf
 import pandas as pd
 from datetime import date, timedelta
 from typing import List
+import logging
+
+# Basic startup logging to help debugging on hosts like Render
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("stock-ma")
 
 app = FastAPI(title="Dip Buying Trigger API")
+
+
+@app.on_event("startup")
+def _startup_event():
+    # This prints to stdout/stderr which hosted platforms capture in logs
+    logger.info("Starting stock-ma FastAPI app — registering routes...")
+    print("[stock-ma] server module imported and startup event fired")
 
 
 index_options = {
