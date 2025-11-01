@@ -85,6 +85,21 @@ def read_root():
     return {"status": "ok", "message": "Dip Buying Trigger API"}
 
 
+@app.get("/routes", tags=["debug"])
+def list_routes():
+    """Return registered routes so we can confirm the /dip endpoint is present on the running app.
+
+    This is a temporary debug endpoint — remove it after troubleshooting.
+    """
+    routes = []
+    for r in app.routes:
+        routes.append({
+            "path": r.path,
+            "methods": sorted(list(r.methods)) if hasattr(r, "methods") else [],
+        })
+    return {"routes": routes}
+
+
 @app.get("/dip", tags=["dip"])
 def get_dip():
     """Return dip/buying recommendations for preset indices as JSON.
