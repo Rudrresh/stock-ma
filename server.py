@@ -17,7 +17,8 @@ app = FastAPI(title="Dip Buying Trigger API")
 # Background task to keep the server alive
 async def keep_alive():
     """Ping self every 14 minutes to prevent Render from sleeping."""
-    ping_url = f"http://0.0.0.0:{os.getenv('PORT', '8000')}/ping"
+    # Use the Render URL for self-pinging
+    ping_url = "https://stock-ma-app.onrender.com/ping"
     async with aiohttp.ClientSession() as session:
         while True:
             try:
@@ -146,7 +147,7 @@ def get_dip():
 
     for name, ticker in index_options.items():
         try:
-            data = yf.download(ticker, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'))
+            data = yf.download(ticker, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'), auto_adjust=True)
         except Exception:
             # skip tickers that fail
             continue
